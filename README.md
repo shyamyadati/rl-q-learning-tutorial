@@ -7,9 +7,16 @@
 ## Tutorial Link:
 <https://www.learndatasci.com/tutorials/reinforcement-q-learning-scratch-python-openai-gym/>
 
+## Other relevant references
+[Source for OpenAI Gym Taxi V3 Env](https://github.com/openai/gym/blob/master/gym/envs/toy_text/taxi.py)
+[Stack overflow for clearing one line from stdout](https://stackoverflow.com/questions/44565704/how-to-clear-only-last-one-line-in-python-output-console/51388326)
 
 ## Notes:
-NOTE: I did not use a Jupyter notebook, I ran this via commandline
+```
+NOTE:
+I did not use a Jupyter notebook as the tutoral recommends.
+I ran this via commandline
+```
 
 ### Specify the constraints of the problem:
 
@@ -23,14 +30,14 @@ NOTE: I did not use a Jupyter notebook, I ran this via commandline
   * 5 possible passenger locations
   * __total__ = 25 x 4 x 5 = __500__
 
-#### 2. Define the possible actions__
+#### 2. Define the possible actions
 * *actions*: the set of actions the agent can take in any state
 * __in the tutorial__:
   ```python 
   actions = {"south", "north", "east", "west", "pick-up", "drop-off"}
   ```
 
-#### 3. Define the action space__
+#### 3. Define the action space
 * *action space*: the set of all the actions that our agent can take in a specific state that is defined within *(is an element of)* the state space
 * __in the tutorial__:
 
@@ -38,7 +45,7 @@ NOTE: I did not use a Jupyter notebook, I ran this via commandline
 
   * The action space for the above state is:
     ```python
-    action_space = {"south", "north", "east"}
+    action_space = {"south", "north", "east", "west"}
     ```
     
 #### 4. Define the rewards/penalties (negative rewards) for the system
@@ -46,11 +53,34 @@ NOTE: I did not use a Jupyter notebook, I ran this via commandline
 * __in the tutorial__:
   * for the state above, we may set the rewards like:
   ```python
-  rewards = {"south" : -1, "north" : 1, "east" : 0.5}
+  rewards = {"south" : 0.5, "north" : 1, "east" : 0.5, "west" : -1}
+  ```
+  *west will lead to a wall hit though so we choose -1 as the reward*
+
+  * note that the rewards are a function of the (state, action) so expect something like this:
+  ```
+  {
+      0   : {"south" : -1, "north" : 1, "east" : 0.5},
+      1   : {"south" : -1, "north" : -1, "east" : 0.25 },
+      ...
+      499 : {"south" :  0, "north" :  1, "east" : -1, ... }
+  }
   ```
 
-### Setup the environement
+### Running the Tutorial
+#### Setup the python environement
+If not already available - install requirements using requirements.py
 ```shell
 python3 -m pip install --upgrade pip
 python3 -m pip install -r ./requirements.txt
 ```
+
+#### Run the tutorial
+Run the tutorial by:
+```shell
+python3 ./tutorial.py
+```
+The tutorial will pause as it progresses through all the steps
+
+### Q-Learning
+
