@@ -8,8 +8,8 @@
 <https://www.learndatasci.com/tutorials/reinforcement-q-learning-scratch-python-openai-gym/>
 
 ## Other relevant references
-[Source for OpenAI Gym Taxi V3 Env](https://github.com/openai/gym/blob/master/gym/envs/toy_text/taxi.py)
-[Stack overflow for clearing one line from stdout](https://stackoverflow.com/questions/44565704/how-to-clear-only-last-one-line-in-python-output-console/51388326)
+* [Source for OpenAI Gym Taxi V3 Env](https://github.com/openai/gym/blob/master/gym/envs/toy_text/taxi.py)
+* [Stack overflow for clearing one line from stdout](https://stackoverflow.com/questions/44565704/how-to-clear-only-last-one-line-in-python-output-console/51388326)
 
 ## Notes:
 ```
