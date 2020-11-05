@@ -80,12 +80,13 @@ def replay(env, frames, time_step=0.01):
     print("Replaying simulation:\n")
     env.s = 328
     env.render()
+    time.sleep(1)
     for f in frames:
-        time.sleep(time_step)
         for i in range(8):
             print ("\033[A\033[A") # clear one line from stdout
         env.s = f['state']
         env.render()
+        time.sleep(time_step)
 
 # -------------------------------------
 def train_q_learning_agent(env, num_epochs=100000):
@@ -257,8 +258,10 @@ if __name__ == "__main__":
     epochs, penalties, frames = run_sim(env)
     print(f"Timesteps taken    : {epochs}")
     print(f"Penalties incurred : {penalties}")
-    replay(env, frames)
-    input("\nPress enter to continue")
+    choice = input("Replay simulation (y/n)? ")
+    if choice.lower()[0] == 'y':
+        replay(env, frames)
+        input("\nPress enter to continue")
 
     # ---------------------------------
     header("Solve the problem using Q-Learning")
@@ -266,9 +269,10 @@ if __name__ == "__main__":
     epochs, penalties, frames = run_sim(env, q_table)
     print(f"Timesteps taken    : {epochs}")
     print(f"Penalties incurred : {penalties}")
-    time.sleep(0.5)
-    replay(env, frames, time_step=1.0)
-    input("\nPress enter to continue")
+    choice = input("Replay simulation (y/n)? ")
+    if choice.lower()[0] == 'y':
+        replay(env, frames, time_step=0.5)
+        input("\nPress enter to continue")
 
 
 
