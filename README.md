@@ -81,6 +81,3 @@ Run the tutorial by:
 python3 ./tutorial.py
 ```
 The tutorial will pause as it progresses through all the steps
-
-### Q-Learning
-
