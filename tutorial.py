@@ -42,9 +42,9 @@ def print_locations(env):
     # get the positions for where the taxi, passenger and destination progromatically
     taxi_row, taxi_col, pass_idx, dest_idx = env.decode(env.s)
     print(f"Current State: {env.s}")
-    print(f"    taxi (row, col) : ({taxi_row}, {taxi_col})")
-    print(f"    passenger       : {passenger_locations[pass_idx]}")
-    print(f"    destination     : {destinations[dest_idx]}")
+    print(f"    taxi location (row, col) : ({taxi_row}, {taxi_col})")
+    print(f"    passenger location       : {passenger_locations[pass_idx]}")
+    print(f"    destination location     : {destinations[dest_idx]}")
 
 
 # -------------------------------------
@@ -98,7 +98,7 @@ def train_q_learning_agent(env, num_epochs=100000):
     """
     # create the q_table size of the observation_space (state space) x action_space
     print("Training the Q-learning agent")
-    print(f"Creating q_table of ({env.observation_space.n} x {env.action_space.n})")
+    print(f"    Creating q_table of ({env.observation_space.n} x {env.action_space.n})")
     q_table = np.zeros([env.observation_space.n, env.action_space.n])
 
     # set up the hyperparameters for the Q-learning model
@@ -110,7 +110,6 @@ def train_q_learning_agent(env, num_epochs=100000):
     all_epochs = []
     all_penalties = []
 
-    print("Staring training...")
     start_time = time.time()
     for i in range(num_epochs):
         # at the beginning of each epoch - start with a new random state
@@ -149,29 +148,40 @@ def train_q_learning_agent(env, num_epochs=100000):
         if i%100 == 0:
             if i != 0:
                 print ("\033[A\033[A") # clear one line from stdout
-            print(f"    Episode: {i}")
+            print(f"    Training - episode: {i}")
 
     print ("\033[A\033[A") # clear one line from stdout
-    print(f"    Episode: {num_epochs}")
-    print(f"Training finished - elapsed time: {(time.time() - start_time):0.3f} s")
+    print(f"    Training - episode: {num_epochs}")
+    print(f"    DONE - elapsed time: {(time.time() - start_time):0.3f} s")
     return q_table
 
 # -------------------------------------
-def run_sim(env, q_table=None):
+def run_sim(env, q_table=None, random_start=False, verbose=True):
     """
     Description:
         Runs a random simulation given the environment
     """
-    env.s = 328  # set environment to illustration's state
+    if not random_start:
+        env.s = 328  # set environment to illustration's state
+    else:
+        env.reset()  # set to a new random environment
 
     # initalize the simlation variables
     epochs = 0
     penalties, reward = 0, 0
     frames = [] # for animation
     done = False
+    frames.append({
+            'frame': env.render(mode='ansi'),
+            'state': None,
+            'action': None,
+            'reward': None
+            }
+        )
 
     # run through the simulation
-    print("Running the simulation ...")
+    if verbose:
+        print("Running the simulation ...")
     while not done:
         if q_table is None: 
             # select a random action
@@ -201,6 +211,35 @@ def run_sim(env, q_table=None):
     
     return epochs, penalties, frames
 
+# -------------------------------------
+def run_multiple_sims(env, q_table=None, num_sims=1000, random_start=False, verbose=False):
+    """
+    Description:
+        Runs multiple simulations for a given scenario
+    """
+    epochs = []
+    penalties = []
+    if q_table is None:
+        sim_type = "random"
+    else:
+        sim_type = "q-learning"
+
+    print(f"Running {num_sims} {sim_type} simulations")
+    for i in range(num_sims):
+        e, p, _ = run_sim(env, q_table=q_table, random_start=random_start, verbose=verbose) 
+        epochs.append(e)
+        penalties.append(p)
+        if i%10 == 0:
+            if i != 0:
+                print ("\033[A\033[A") # clear one line from stdout
+            print(f"    Episode: {i}")
+    print ("\033[A\033[A") # clear one line from stdout
+    print(f"    Episode: {num_sims}")        
+
+    mean_epochs = sum(epochs)/len(epochs)
+    mean_penalties = sum(penalties)/len(penalties)
+    return mean_epochs, mean_penalties
+
 # =============================================================================
 # start main
 if __name__ == "__main__":
@@ -208,21 +247,20 @@ if __name__ == "__main__":
     # create the taxi environment
     # NOTE: The tutorial states v2, but this caused a:
     # gym.error.DeprecatedEnv: Env Taxi-v2 not found (valid versions include ['Taxi-v3'])
-    header("Creating the environemnt")
+    header("Creating the environemnt")  
+    # Creates the environment in a random state
     env = gym.make("Taxi-v3").env
 
     # Render the environment to visualize it
-    # NOTE: This will create the environment in a random state
-    print("NOTE:")
-    print("    | is a wall")
+    env.render()
+
+    print("General Notes:")
+    print("    '|' is a wall")
     print("    'R','G','Y','B' are pick-up/drop-off locations")
-    print("    BLUE:    letter is passenger")
-    print("    MAGENTA: destination")
+    print("    BLUE letter is current location of passenger")
+    print("    MAGENTA letter is destination")
     print("    YELLOW filled cursor is current location of empty taxi")
     print("    GREEN filled cursor is current location of full taxi")
-    print(f"Current state number: {env.s}")
-
-    env.render()
     print_locations(env)
     print_rewards_table(env)
     input("\nPress enter to continue")
@@ -248,9 +286,11 @@ if __name__ == "__main__":
     # solve without using RL
     header("Try and solve the problem without reinforcement learning")
     epochs, penalties, frames = run_sim(env)
-    print(f"Timesteps taken    : {epochs}")
-    print(f"Penalties incurred : {penalties}")
+    print(f"    Timesteps taken    : {epochs}")
+    print(f"    Penalties incurred : {penalties}")
     choice = input("Replay simulation (y/n)? ")
+    if not choice:
+        choice = 'n'
     if choice.lower()[0] == 'y':
         replay(env, frames)
         input("\nPress enter to continue")
@@ -258,13 +298,31 @@ if __name__ == "__main__":
     # ---------------------------------
     header("Solve the problem using Q-Learning")
     q_table = train_q_learning_agent(env)
-    epochs, penalties, frames = run_sim(env, q_table)
-    print(f"Timesteps taken    : {epochs}")
-    print(f"Penalties incurred : {penalties}")
+    epochs, penalties, frames = run_sim(env, q_table=q_table)
+    print(f"    Timesteps taken    : {epochs}")
+    print(f"    Penalties incurred : {penalties}")
     choice = input("Replay simulation (y/n)? ")
+    if not choice:
+        choice = 'n'
     if choice.lower()[0] == 'y':
         replay(env, frames, time_step=0.5)
         input("\nPress enter to continue")
+
+    # ---------------------------------
+    header("Comparing the two approaches")
+    mean_r_epochs, mean_r_penalties = run_multiple_sims(env)
+    mean_q_epochs, mean_q_penalties = run_multiple_sims(env, q_table=q_table)
+    
+    print("Results:")
+    print("    Average steps required:")
+    print(f"        Random     : {mean_r_epochs}")
+    print(f"        Q-Learning : {mean_q_epochs}")
+    print("    Average penalties incurred:")
+    print(f"        Random     : {mean_r_penalties}")
+    print(f"        Q-Learning : {mean_q_penalties}")
+
+
+    
 
 
 
