@@ -88,47 +88,6 @@ def replay(env, frames, time_step=0.01):
         env.render()
 
 # -------------------------------------
-def run_random_sim(env):
-    """
-    Description:
-        Runs a random simulation given the environment
-    """
-    env.s = 328  # set environment to illustration's state
-
-    # initalize the simlation variables
-    epochs = 0
-    penalties, reward = 0, 0
-    frames = [] # for animation
-    done = False
-
-    # run through the simulation
-    print("Running the simulation ...")
-    while not done:
-        # select a random action
-        action = env.action_space.sample() 
-
-        # Apply the selected action to the environment
-        state, reward, done, info = env.step(action)
-
-        # count the number of penalties that we incurr
-        if reward == -10:
-            penalties += 1
-        
-        # Put each rendered frame into dict for animation after
-        frames.append({
-            'frame': env.render(mode='ansi'),
-            'state': state,
-            'action': action,
-            'reward': reward
-            }
-        )
-
-        # increment the epoc count
-        epochs += 1
-    
-    return epochs, penalties, frames
-
-# -------------------------------------
 def train_q_learning_agent(env, num_epochs=100000):
     """
     Description:
@@ -295,7 +254,7 @@ if __name__ == "__main__":
     # ---------------------------------
     # solve without using RL
     header("Try and solve the problem without reinforcement learning")
-    epochs, penalties, frames = run_random_sim(env)
+    epochs, penalties, frames = run_sim(env)
     print(f"Timesteps taken    : {epochs}")
     print(f"Penalties incurred : {penalties}")
     replay(env, frames)
@@ -308,7 +267,7 @@ if __name__ == "__main__":
     print(f"Timesteps taken    : {epochs}")
     print(f"Penalties incurred : {penalties}")
     time.sleep(0.5)
-    replay(env, frames, time_step=0.25)
+    replay(env, frames, time_step=1.0)
     input("\nPress enter to continue")
 
 
