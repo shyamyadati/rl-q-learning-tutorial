@@ -201,14 +201,6 @@ def run_sim(env, q_table=None):
     
     return epochs, penalties, frames
 
-# -------------------------------------
-def run_q_learning_sim(env, q_table):
-    """
-    Description:
-        Runs the simulation
-    """
-    pass
-
 # =============================================================================
 # start main
 if __name__ == "__main__":
